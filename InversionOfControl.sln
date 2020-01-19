@@ -10,6 +10,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InversionOfControl", "src\InversionOfControl\InversionOfControl.csproj", "{A82007EC-1300-4EFD-B565-EABCC27D3D7D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{39C44705-559A-4F7F-9D05-A6A495F3C8F6}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InversionOfControl.UnitTests", "tests\InversionOfControl.UnitTests\InversionOfControl.UnitTests.csproj", "{29712CC4-5979-4745-BB75-C3BA53F032E3}"
 EndProject
