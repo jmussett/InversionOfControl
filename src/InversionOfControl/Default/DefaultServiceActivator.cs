@@ -17,7 +17,7 @@ namespace InversionOfControl
 
             // If a factory method is defined, invoke it to activate the service.
             if (registration.FactoryMethod != null)
-                return visitor.InvokeServiceFactory((Func<IContainerRuntime, object>)registration.FactoryMethod.Clone());
+                return visitor.InvokeServiceFactory(registration.FactoryMethod);
 
             // Otherwise, activate by constructor.
             return ActivateConstructor(registration, chain, visitor);
