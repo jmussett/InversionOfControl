@@ -192,8 +192,8 @@ var containerBuilder = new ContainerBuilder(new CustomServiceActivator());
 
 Most features I've wanted from a Dependancy Injection framework have been implemented. But here's a few extras I intend to look at in the future, when I have time:
 
-* Support for multiple implementations of a single service types, allowing the user to resolve an IEnumerable of services.
-* Performance and Concurency improvements.
+* Support for multiple implementations of a single service type, allowing the user to resolve a collection of services.
+* Performance and concurency improvements.
 * Support for invocation interceptors.
 
 
