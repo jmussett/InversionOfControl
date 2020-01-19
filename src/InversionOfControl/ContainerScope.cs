@@ -41,7 +41,7 @@ namespace InversionOfControl
             if (_disposed)
                 throw new ObjectDisposedException(nameof(IContainerScope));
 
-            // Attempt to retrieve the service instance from the scope.
+            // Attempt to retrieve the instance from the service context.
             var instance = _serviceContext.GetService(registration.ServiceType);
 
             // If instance doesn't exist, we need to activate it.
