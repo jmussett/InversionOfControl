@@ -141,35 +141,35 @@ You can implement these interfaces yourself by passing the IServiceContextFactor
 var containerBuilder = new ContainerBuilder(new CustomServiceContextFactory());
 ```
 
-### IDescriptorContext
+### IRegistrationContext
 
-When registering new services, descriptors, describing the specifics of a service, will need to have a storage and retrieval mechanism when attempting to resolve new service instances.  
+When registering new services, the registration will need to have a storage and retrieval mechanism when attempting to resolve new service instances.  
 
-The IDescriptorContext does just that, exactly like what the IServiceContext does when it comes to service instances. Only difference is it requires a single instance throughout the lifetime of the ContainerRuntime.  
+The IRegistrationContext does just that, exactly like what the IServiceContext does when it comes to service instances. Only difference is it requires a single instance throughout the lifetime of the ContainerRuntime.  
 
-The IDescriptorContext has the following interfaces:
+The IRegistrationContext has the following interfaces:
 
 ```c#
-public interface IDescriptorContext
+public interface IRegistrationContext
 {
-    void AddDescriptor(ServiceDescriptor descriptor);
-    ServiceDescriptor GetDescriptor(Type type);
+    void RegisterService(ServiceRegistration registration);
+    ServiceRegistration GetRegistration(Type type);
 }
 ```
 
 And you can pass it directly to the ContainerBuilder like so:
 
 ```c#
-var containerBuilder = new ContainerBuilder(new CustomDescriptorContext());
+var containerBuilder = new ContainerBuilder(new CustomRegistrationContext());
 ```
 
 ### IServiceActivator
 
 And last but not least, the IServiceActivator. This interface is where all of the constructor invocation and dependancy injection takes place.  
 
-When the descriptor has been found for a service and the correct scope has been assigned, the ActivateInstance() method is called on the activator.
+When the registration has been found for a service and the correct scope has been assigned, the ActivateInstance() method is called on the activator.
 It passes through the following:
-* A service descriptor, allowing you to identify the details for that given service.
+* A service registration, allowing you to identify the details for that given service.
 * A dependancy chain of where the service is at in relation to other dependancies.
 * And an IServiceVisitor interface, allowing you to locate child services and activate factory methods.
 
@@ -178,7 +178,7 @@ Below is the interface for the ServiceActivator, the rest of the implementation 
 ```c#
 public interface IServiceActivator
 {
-    object ActivateInstance(ServiceDescriptor descriptor, DependencyChain chain, IServiceVisitor visitor);
+    object ActivateInstance(ServiceRegistration registration, DependencyChain chain, IServiceVisitor visitor);
 }
 ```
 

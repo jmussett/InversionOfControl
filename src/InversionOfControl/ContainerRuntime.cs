@@ -6,16 +6,16 @@ namespace InversionOfControl
     internal class ContainerRuntime : IContainerRuntime
     {
         private readonly IServiceActivator _activator;
-        private readonly IDescriptorContext _descriptorContext;
+        private readonly IRegistrationContext _registrationContext;
         private readonly IServiceContextFactory _serviceContextFactory;
         private readonly ContainerScope _runtimeScope;
 
         internal ContainerRuntime(
-            IDescriptorContext descriptors,
+            IRegistrationContext registrationContext,
             IServiceActivator activator,
             IServiceContextFactory contextFactory)
         {
-            _descriptorContext = descriptors ?? throw new ArgumentNullException(nameof(descriptors));
+            _registrationContext = registrationContext ?? throw new ArgumentNullException(nameof(registrationContext));
             _activator = activator ?? throw new ArgumentNullException(nameof(activator));
             _serviceContextFactory = contextFactory ?? throw new ArgumentNullException(nameof(activator));
 
@@ -47,32 +47,32 @@ namespace InversionOfControl
 
         internal object GetService(DependencyChain chain, ContainerScope scope)
         {
-            // First, read the descriptor from the runtime to determine the lifespan.
-            var descriptor = _descriptorContext.GetDescriptor(chain.Type);
+            // First, read the registration from the runtime to determine the lifespan.
+            var registration = _registrationContext.GetRegistration(chain.Type);
 
             // We return null here instead of throwing an exception.
             // Different exceptions might want to be thrown depending on the context.
-            if (descriptor == null)
+            if (registration == null)
                 return null;
 
-            switch (descriptor.ServiceLifespan)
+            switch (registration.ServiceLifespan)
             {
                 case ServiceLifespan.Transient:
 
                     // For Transient, activate a new instance each time.
-                    return _activator.ActivateInstance(descriptor, chain, new ServiceVisitor(this, scope));
+                    return _activator.ActivateInstance(registration, chain, new ServiceVisitor(this, scope));
 
                 case ServiceLifespan.Singleton:
 
                     // For Singleton, rely on the runtime scope to retrieve the instance.
-                    return _runtimeScope.GetScopedService(descriptor, chain);
+                    return _runtimeScope.GetScopedService(registration, chain);
 
                 case ServiceLifespan.Scoped:
 
                     // For Scoped, rely on the scope to retrieve the instance.
-                    return scope.GetScopedService(descriptor, chain);
+                    return scope.GetScopedService(registration, chain);
                 default:
-                    throw new NotImplementedException($"Lifespan '{descriptor.ServiceLifespan}' is not supported");
+                    throw new NotImplementedException($"Lifespan '{registration.ServiceLifespan}' is not supported");
             }
         }
     }

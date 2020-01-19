@@ -9,23 +9,23 @@ namespace InversionOfControl
     /// </summary>
     public class DefaultServiceActivator : IServiceActivator
     {
-        public object ActivateInstance(ServiceDescriptor descriptor, DependencyChain chain, IServiceVisitor visitor)
+        public object ActivateInstance(ServiceRegistration registration, DependencyChain chain, IServiceVisitor visitor)
         {
             // Check dependency chain to see if we have a circular dependency.
             if (DetectCycle(chain))
                 throw new CircularDependencyException(chain.Type, GetResolutionStack(chain));
 
             // If a factory method is defined, invoke it to activate the service.
-            if (descriptor.FactoryMethod != null)
-                return visitor.InvokeServiceFactory((Func<IContainerRuntime, object>)descriptor.FactoryMethod.Clone());
+            if (registration.FactoryMethod != null)
+                return visitor.InvokeServiceFactory((Func<IContainerRuntime, object>)registration.FactoryMethod.Clone());
 
             // Otherwise, activate by constructor.
-            return ActivateConstructor(descriptor, chain, visitor);
+            return ActivateConstructor(registration, chain, visitor);
         }
 
-        private object ActivateConstructor(ServiceDescriptor descriptor, DependencyChain chain, IServiceVisitor visitor)
+        private object ActivateConstructor(ServiceRegistration registration, DependencyChain chain, IServiceVisitor visitor)
         {
-            var concreteType = descriptor.ConcreteType;
+            var concreteType = registration.ConcreteType;
 
             // If the concrete type is a generic type definition, we cannot invoke it's constructor.
             // We need to construct the type using the generic arguments defined on the requested type from the dependency chain.
@@ -74,10 +74,10 @@ namespace InversionOfControl
 
             // Throw exception if a service was missing for the constructor.
             if (missingService != null)
-                throw new MissingDependencyException(missingService, descriptor.ConcreteType, GetResolutionStack(chain));
+                throw new MissingDependencyException(missingService, registration.ConcreteType, GetResolutionStack(chain));
 
             // If we reach this code path, no valid public constructors were found.
-            throw new MissingConstructorException(descriptor.ConcreteType);
+            throw new MissingConstructorException(registration.ConcreteType);
         }
 
         // We produce the resolution stack by recursively interating through the dependency chain nodes.

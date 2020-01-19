@@ -13,7 +13,7 @@ namespace InversionOfControl
         object LocateService(DependencyChain chain);
 
         /// <summary>
-        /// Invokes the factory method and returns the service instance for the requested service descriptor.
+        /// Invokes the factory method and returns the instance for the requested service.
         /// </summary>
         object InvokeServiceFactory(Func<IContainerRuntime, object> factoryMethod);
     }

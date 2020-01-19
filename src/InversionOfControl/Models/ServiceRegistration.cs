@@ -3,9 +3,9 @@
 namespace InversionOfControl
 {
     /// <summary>
-    /// Class used to to describe a service.
+    /// Class with registration information for a service.
     /// </summary>
-    public partial class ServiceDescriptor
+    public partial class ServiceRegistration
     {
         /// <summary>
         /// The type the service is registered for.

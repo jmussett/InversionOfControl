@@ -5,15 +5,15 @@ namespace InversionOfControl
     // The internal implementation of the IContainerScope interface
     internal class ContainerScope : IContainerScope
     {
-        private readonly IServiceContext _services;
+        private readonly IServiceContext _serviceContext;
         private readonly IServiceActivator _activator;
         private readonly ContainerRuntime _runtime;
 
         private bool _disposed = false;
 
-        internal ContainerScope(IServiceContext services, IServiceActivator activator, ContainerRuntime runtime)
+        internal ContainerScope(IServiceContext serviceContext, IServiceActivator activator, ContainerRuntime runtime)
         {
-            _services = services ?? throw new ArgumentNullException(nameof(services));
+            _serviceContext = serviceContext ?? throw new ArgumentNullException(nameof(serviceContext));
             _activator = activator ?? throw new ArgumentNullException(nameof(activator));
             _runtime = runtime ?? throw new ArgumentNullException(nameof(runtime));
         }
@@ -36,23 +36,23 @@ namespace InversionOfControl
             return (TService) service;
         }
 
-        internal object GetScopedService(ServiceDescriptor descriptor, DependencyChain chain)
+        internal object GetScopedService(ServiceRegistration registration, DependencyChain chain)
         {
             if (_disposed)
                 throw new ObjectDisposedException(nameof(IContainerScope));
 
             // Attempt to retrieve the service instance from the scope.
-            var instance = _services.GetService(descriptor.ServiceType);
+            var instance = _serviceContext.GetService(registration.ServiceType);
 
             // If instance doesn't exist, we need to activate it.
             if (instance == null)
             {
-                // Use instance on descriptor, if defined.
+                // Use instance on registration, if defined.
                 // Otherwise, activate a new instance.
-                instance = descriptor.ServiceInstance ??
-                    _activator.ActivateInstance(descriptor, chain, new ServiceVisitor(_runtime, this));
+                instance = registration.ServiceInstance ??
+                    _activator.ActivateInstance(registration, chain, new ServiceVisitor(_runtime, this));
 
-                _services.AddService(descriptor.ServiceType, instance);
+                _serviceContext.AddService(registration.ServiceType, instance);
             }
 
             return instance;
@@ -62,7 +62,7 @@ namespace InversionOfControl
         {
             if (!_disposed)
             {
-                _services.Dispose();
+                _serviceContext.Dispose();
                 _disposed = true;
             }
         }

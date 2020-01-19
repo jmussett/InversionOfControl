@@ -7,7 +7,7 @@ namespace InversionOfControl
     /// </summary>
     public class ContainerBuilder : IContainerBuilder
     {
-        private readonly IDescriptorContext _descriptorContext;
+        private readonly IRegistrationContext _registrationContext;
         private readonly IServiceActivator _activator;
         private readonly IServiceContextFactory _contextFactory;
 
@@ -15,32 +15,32 @@ namespace InversionOfControl
         /// Creates a new Container Builder with the default service implementation.
         /// </summary>
         public ContainerBuilder()
-            : this(new DefaultDescriptorContext(), new DefaultServiceActivator(), new DefaultServiceContextFactory()) { }
+            : this(new DefaultRegistrationContext(), new DefaultServiceActivator(), new DefaultServiceContextFactory()) { }
 
         /// <summary>
         /// Creates a new Container Builder with a custom IServiceActivator implementation.
         /// </summary>
         public ContainerBuilder(IServiceActivator activator)
-            : this(new DefaultDescriptorContext(), activator, new DefaultServiceContextFactory()) { }
+            : this(new DefaultRegistrationContext(), activator, new DefaultServiceContextFactory()) { }
 
         /// <summary>
-        /// Creates a new Container Builder with a custom IDescriptorContext implementation.
+        /// Creates a new Container Builder with a custom IRegistrationContext implementation.
         /// </summary>
-        public ContainerBuilder(IDescriptorContext descriptors)
-            : this(descriptors, new DefaultServiceActivator(), new DefaultServiceContextFactory()) { }
+        public ContainerBuilder(IRegistrationContext registrationContext)
+            : this(registrationContext, new DefaultServiceActivator(), new DefaultServiceContextFactory()) { }
 
         /// <summary>
         /// Creates a new Container Builder with a custom IServiceContextFactory implementation.
         /// </summary>
         public ContainerBuilder(IServiceContextFactory contextFactory)
-            : this(new DefaultDescriptorContext(), new DefaultServiceActivator(), contextFactory) { }
+            : this(new DefaultRegistrationContext(), new DefaultServiceActivator(), contextFactory) { }
 
         /// <summary>
-        /// Creates a new Container Builder with a custom IDescriptorContext, IServiceActivator and IServiceContextFactory implementation.
+        /// Creates a new Container Builder with a custom IRegistrationContext, IServiceActivator and IServiceContextFactory implementation.
         /// </summary>
-        public ContainerBuilder(IDescriptorContext descriptors, IServiceActivator activator, IServiceContextFactory contextFactory)
+        public ContainerBuilder(IRegistrationContext registrationContext, IServiceActivator activator, IServiceContextFactory contextFactory)
         {
-            _descriptorContext = descriptors ?? throw new ArgumentNullException(nameof(descriptors));
+            _registrationContext = registrationContext ?? throw new ArgumentNullException(nameof(registrationContext));
             _activator = activator ?? throw new ArgumentNullException(nameof(activator));
             _contextFactory = contextFactory ?? throw new ArgumentNullException(nameof(contextFactory));
         }
@@ -109,7 +109,7 @@ namespace InversionOfControl
 
         private IContainerBuilder AddService(ServiceLifespan lifespan, Type serviceType, Type concreteType, Func<IContainerRuntime, object> factoryMethod, object instance)
         {
-            _descriptorContext.AddDescriptor(new ServiceDescriptor
+            _registrationContext.RegisterService(new ServiceRegistration
             {
                 ServiceType = serviceType,
                 ConcreteType = concreteType,
@@ -122,6 +122,6 @@ namespace InversionOfControl
         }
 
         public IContainerRuntime BuildRuntime() 
-            => new ContainerRuntime(_descriptorContext, _activator, _contextFactory);
+            => new ContainerRuntime(_registrationContext, _activator, _contextFactory);
     }
 }

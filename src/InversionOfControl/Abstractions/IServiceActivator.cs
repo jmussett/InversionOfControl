@@ -6,8 +6,8 @@
     public interface IServiceActivator
     {
         /// <summary>
-        /// Activates a new instance of a describes instance in a given location in a dependency chain.
+        /// Activates a new instance of a registered instance in a given location in a dependency chain.
         /// </summary>
-        object ActivateInstance(ServiceDescriptor descriptor, DependencyChain chain, IServiceVisitor visitor);
+        object ActivateInstance(ServiceRegistration registration, DependencyChain chain, IServiceVisitor visitor);
     }
 }
