@@ -1,0 +1,41 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29519.181
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E91D78E7-F261-4331-AE60-67F3F005D7CA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{021D2C23-8530-4DDC-82C3-48FB1F4E9E17}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InversionOfControl", "src\InversionOfControl\InversionOfControl.csproj", "{A82007EC-1300-4EFD-B565-EABCC27D3D7D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{39C44705-559A-4F7F-9D05-A6A495F3C8F6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InversionOfControl.UnitTests", "tests\InversionOfControl.UnitTests\InversionOfControl.UnitTests.csproj", "{29712CC4-5979-4745-BB75-C3BA53F032E3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A82007EC-1300-4EFD-B565-EABCC27D3D7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A82007EC-1300-4EFD-B565-EABCC27D3D7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A82007EC-1300-4EFD-B565-EABCC27D3D7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A82007EC-1300-4EFD-B565-EABCC27D3D7D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29712CC4-5979-4745-BB75-C3BA53F032E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29712CC4-5979-4745-BB75-C3BA53F032E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29712CC4-5979-4745-BB75-C3BA53F032E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29712CC4-5979-4745-BB75-C3BA53F032E3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A82007EC-1300-4EFD-B565-EABCC27D3D7D} = {E91D78E7-F261-4331-AE60-67F3F005D7CA}
+		{29712CC4-5979-4745-BB75-C3BA53F032E3} = {021D2C23-8530-4DDC-82C3-48FB1F4E9E17}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {23C46C7E-8085-442F-AE6F-01AAF6DC2F38}
+	EndGlobalSection
+EndGlobal
