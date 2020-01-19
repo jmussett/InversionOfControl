@@ -64,7 +64,7 @@ namespace InversionOfControl
                     paramInstances.Add(parameter);
                 }
 
-                // If a parameter was missing, mode to the next constructor.
+                // If a parameter was missing, move to the next constructor.
                 if (missingService != null)
                     continue;
 
@@ -72,7 +72,7 @@ namespace InversionOfControl
                 return constructor.Invoke(paramInstances.ToArray());
             }
 
-            // Throw exception if a service was missing for the constructor.
+            // Throw exception if a service was missing for the last constructor.
             if (missingService != null)
                 throw new MissingDependencyException(missingService, registration.ConcreteType, GetResolutionStack(chain));
 
