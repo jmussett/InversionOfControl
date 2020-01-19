@@ -163,17 +163,19 @@ namespace InversionOfControl.UnitTests
         [Fact]
         public void DisposeScopeShouldDisposeInstances()
         {
-            var scope = new ContainerBuilder()
+            var runtime = new ContainerBuilder()
                 .AddScoped<DisposableClass>()
-                .BuildRuntime()
-                .CreateScope();
+                .BuildRuntime();
 
-            var test = scope.GetService<DisposableClass>();
+            DisposableClass test;
 
-            test.Should().NotBeNull();
-            test.Disposed.Should().BeFalse();
+            using (var scope = runtime.CreateScope())
+            {
+                test = scope.GetService<DisposableClass>();
 
-            scope.Dispose();
+                test.Should().NotBeNull();
+                test.Disposed.Should().BeFalse();
+            }
 
             test.Disposed.Should().BeTrue();
         }
