@@ -1,20 +1,23 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace InversionOfControl
 {
     /// <summary>
     /// A context used for the registration and retrieval of service registrations.
     /// </summary>
-    public interface IRegistrationContext
+    public interface IRegistrationSource
     {
         /// <summary>
         /// Registers a registration to the context for a given service.
         /// </summary>
         void RegisterService(ServiceRegistration registration);
 
+        void RegisterServices(Type serviceType, IEnumerable<ServiceRegistration> registrations);
+
         /// <summary>
-        /// Retrieves the registration for a service with a given type.
+        /// Retrieves the registrations for a service with a given type.
         /// </summary>
-        ServiceRegistration GetRegistration(Type type);
+        IEnumerable<ServiceRegistration> GetRegistrations(Type type);
     }
 }

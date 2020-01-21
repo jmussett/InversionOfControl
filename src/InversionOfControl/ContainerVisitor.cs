@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace InversionOfControl
 {
     // The internal implementation of the IServiceVisitor interface
-    internal class ServiceVisitor : IServiceVisitor
+    internal class ServiceVisitor : IContainerVisitor
     {
         private readonly ContainerRuntime _runtime;
         private readonly ContainerScope _scope;
@@ -14,11 +15,11 @@ namespace InversionOfControl
             _scope = scope ?? throw new ArgumentNullException(nameof(scope));
         }
 
-        public object LocateService(DependencyChain chain)
+        public IEnumerable<object> LocateServices(DependencyChain chain)
         {
             chain = chain ?? throw new ArgumentNullException(nameof(chain));
 
-            return _runtime.GetService(chain, _scope);
+            return _runtime.GetServices(chain, _scope);
         }
 
         public object InvokeServiceFactory(Func<IContainerRuntime, object> factoryMethod)

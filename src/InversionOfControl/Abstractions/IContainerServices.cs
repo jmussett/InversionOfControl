@@ -1,4 +1,6 @@
-﻿namespace InversionOfControl
+﻿using System.Collections.Generic;
+
+namespace InversionOfControl
 {
     /// <summary>
     /// A dependency container used for retrieving and instanciating services.

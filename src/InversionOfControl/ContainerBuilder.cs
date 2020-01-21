@@ -7,42 +7,13 @@ namespace InversionOfControl
     /// </summary>
     public class ContainerBuilder : IContainerBuilder
     {
-        private readonly IRegistrationContext _registrationContext;
-        private readonly IServiceActivator _activator;
-        private readonly IServiceContextFactory _contextFactory;
+        private readonly IRegistrationSource _registrationSource;
+        private readonly IContainerBackend _backend;
 
-        /// <summary>
-        /// Creates a new Container Builder with the default service implementation.
-        /// </summary>
         public ContainerBuilder()
-            : this(new DefaultRegistrationContext(), new DefaultServiceActivator(), new DefaultServiceContextFactory()) { }
-
-        /// <summary>
-        /// Creates a new Container Builder with a custom IServiceActivator implementation.
-        /// </summary>
-        public ContainerBuilder(IServiceActivator activator)
-            : this(new DefaultRegistrationContext(), activator, new DefaultServiceContextFactory()) { }
-
-        /// <summary>
-        /// Creates a new Container Builder with a custom IRegistrationContext implementation.
-        /// </summary>
-        public ContainerBuilder(IRegistrationContext registrationContext)
-            : this(registrationContext, new DefaultServiceActivator(), new DefaultServiceContextFactory()) { }
-
-        /// <summary>
-        /// Creates a new Container Builder with a custom IServiceContextFactory implementation.
-        /// </summary>
-        public ContainerBuilder(IServiceContextFactory contextFactory)
-            : this(new DefaultRegistrationContext(), new DefaultServiceActivator(), contextFactory) { }
-
-        /// <summary>
-        /// Creates a new Container Builder with a custom IRegistrationContext, IServiceActivator and IServiceContextFactory implementation.
-        /// </summary>
-        public ContainerBuilder(IRegistrationContext registrationContext, IServiceActivator activator, IServiceContextFactory contextFactory)
         {
-            _registrationContext = registrationContext ?? throw new ArgumentNullException(nameof(registrationContext));
-            _activator = activator ?? throw new ArgumentNullException(nameof(activator));
-            _contextFactory = contextFactory ?? throw new ArgumentNullException(nameof(contextFactory));
+            _registrationSource = new DefaultRegistrationSource();
+            _backend = new DefaultContainerBackend();
         }
 
         public IContainerBuilder AddScoped<TService>()
@@ -109,7 +80,7 @@ namespace InversionOfControl
 
         private IContainerBuilder AddService(ServiceLifespan lifespan, Type serviceType, Type concreteType, Func<IContainerRuntime, object> factoryMethod, object instance)
         {
-            _registrationContext.RegisterService(new ServiceRegistration
+            _registrationSource.RegisterService(new ServiceRegistration
             {
                 ServiceType = serviceType,
                 ConcreteType = concreteType,
@@ -122,6 +93,6 @@ namespace InversionOfControl
         }
 
         public IContainerRuntime BuildRuntime() 
-            => new ContainerRuntime(_registrationContext, _activator, _contextFactory);
+            => new ContainerRuntime(_registrationSource, _backend);
     }
 }

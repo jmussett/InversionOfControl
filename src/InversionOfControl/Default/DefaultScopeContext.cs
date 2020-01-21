@@ -6,14 +6,14 @@ namespace InversionOfControl
     /// <summary>
     /// The default implementation of the IServiceContext interface
     /// </summary>
-    public class DefaultServiceContext : IServiceContext
+    public class DefaultScopeContext : IScopeContext
     {
         private readonly IDictionary<Type, object> _serviceInstances;
         private readonly ICollection<IDisposable> _serviceHandles;
 
         private bool _disposed = false;
 
-        public DefaultServiceContext()
+        public DefaultScopeContext()
         {
             _serviceInstances = new Dictionary<Type, object>();
             _serviceHandles = new List<IDisposable>();
@@ -22,7 +22,7 @@ namespace InversionOfControl
         public void AddService(Type serviceType, object instance)
         {
             if (_disposed)
-                throw new ObjectDisposedException(nameof(IServiceContext));
+                throw new ObjectDisposedException(nameof(IScopeContext));
 
             instance = instance ?? throw new ArgumentNullException(nameof(instance));
 
@@ -47,7 +47,7 @@ namespace InversionOfControl
         public void Dispose()
         {
             if (_disposed)
-                throw new ObjectDisposedException(nameof(IServiceContext));
+                throw new ObjectDisposedException(nameof(IScopeContext));
 
             // When disposing of the context, also dispose of all registered service handles.
             foreach (var handle in _serviceHandles)
