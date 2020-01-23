@@ -6,24 +6,13 @@ using System.Linq;
 namespace InversionOfControl
 {
     /// <summary>
-    /// The default implementation of the IServiceActivator interface
+    /// The default implementation of the IContainerBackend interface
     /// </summary>
     public class DefaultContainerBackend : IContainerBackend
     {
-        public IScopeContext CreateScopeContext() => new DefaultScopeContext();
+        public virtual IScopeContext CreateScopeContext() => new DefaultScopeContext();
 
-        public TService CreateService<TService>(IEnumerable<object> services)
-        {
-            var type = typeof(TService);
-            var service = CreateService(type, services);
-
-            if (service == null)
-                throw new MissingServiceException(type);
-
-            return (TService) service;
-        }
-
-        private object CreateService(Type type, IEnumerable<object> services)
+        public virtual object CreateService(Type type, IEnumerable<object> services)
         {
             // Check if the type is a list and attempt 
             if (type.IsGenericType)
@@ -50,7 +39,7 @@ namespace InversionOfControl
             return services.FirstOrDefault();
         }
 
-        public object ActivateInstance(ServiceRegistration registration, DependencyChain chain, IContainerVisitor visitor)
+        public virtual object ActivateInstance(ServiceRegistration registration, DependencyChain chain, IContainerVisitor visitor)
         {
             // Check dependency chain to see if we have a circular dependency.
             if (DetectCycle(chain))

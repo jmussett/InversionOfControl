@@ -14,7 +14,7 @@ namespace InversionOfControl.UnitTests
                 .AddTransient<ICollectionType, CollectionType2>()
                 .BuildRuntime();
 
-            var test1 = runtime.GetService<IEnumerable<ICollectionType>>();
+            var test1 = runtime.GetServices<ICollectionType>();
 
             test1.Should().NotBeNull();
 

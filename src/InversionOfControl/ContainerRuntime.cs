@@ -32,13 +32,11 @@ namespace InversionOfControl
             return new ContainerScope(scopeContext, _backend, this);
         }
 
-        public TService GetService<TService>()
+        public object GetService(Type type)
         {
-            var type = typeof(TService);
-
             var services = GetServices(new DependencyChain(type), _runtimeScope);
 
-            return _backend.CreateService<TService>(services);
+            return _backend.CreateService(type, services);
         }
 
         internal IEnumerable<object> GetServices(DependencyChain chain, ContainerScope scope)

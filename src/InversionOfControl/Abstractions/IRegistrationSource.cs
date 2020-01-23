@@ -13,6 +13,9 @@ namespace InversionOfControl
         /// </summary>
         void RegisterService(ServiceRegistration registration);
 
+        /// <summary>
+        /// Registers a collection of registerations to a specific type
+        /// </summary>
         void RegisterServices(Type serviceType, IEnumerable<ServiceRegistration> registrations);
 
         /// <summary>

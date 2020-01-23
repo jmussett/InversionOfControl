@@ -18,18 +18,16 @@ namespace InversionOfControl
             _runtime = runtime ?? throw new ArgumentNullException(nameof(runtime));
         }
 
-        public TService GetService<TService>()
+        public object GetService(Type type)
         {
             if (_disposed)
                 throw new ObjectDisposedException(nameof(IContainerScope));
-
-            var type = typeof(TService);
 
             // Services are always resolved at runtime,
             // so we pass the current scope to the runtime method.
             var services = _runtime.GetServices(new DependencyChain(type), this);
 
-            return _backend.CreateService<TService>(services);
+            return _backend.CreateService(type, services);
         }
 
         internal object GetScopedService(ServiceRegistration registration, DependencyChain chain)

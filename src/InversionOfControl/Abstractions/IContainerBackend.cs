@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace InversionOfControl
 {
     /// <summary>
-    /// An interface used by the runtime for activating new services. 
+    /// Interface for backend implementation for container logic
     /// </summary>
     public interface IContainerBackend
     {
@@ -15,7 +16,7 @@ namespace InversionOfControl
         /// <summary>
         /// Creates the single compiled service for all instances found for that service type.
         /// </summary>
-        TService CreateService<TService>(IEnumerable<object> services);
+        object CreateService(Type type, IEnumerable<object> services);
 
         /// <summary>
         /// Activates a new instance of a registered instance in a given location in the dependency chain.

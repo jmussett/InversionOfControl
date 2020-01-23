@@ -56,7 +56,7 @@ namespace InversionOfControl.UnitTests
             var runtime = new ContainerBuilder()
                 .BuildRuntime();
 
-            runtime.Invoking(r => r.GetService<A>())
+            runtime.Invoking(r => r.GetRequiredService<A>())
                 .Should()
                 .Throw<MissingServiceException>()
                 .WithMessage($"Type not registered for service '{typeof(A).FullName}'.");
