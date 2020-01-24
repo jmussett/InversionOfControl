@@ -3,9 +3,9 @@
 namespace InversionOfControl
 {
     /// <summary>
-    /// A context used for the storage and retrieval of service instances.
+    /// A context used by a scope for the storage and retrieval of service instances.
     /// </summary>
-    public interface IServiceContext : IDisposable
+    public interface IScopeContext : IDisposable
     {
         /// <summary>
         /// Adds a service with a given type and instance.

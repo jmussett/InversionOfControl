@@ -1,23 +1,23 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace InversionOfControl
 {
     // The internal implementation of the IContainerRuntime interface
     internal class ContainerRuntime : IContainerRuntime
     {
-        private readonly IServiceActivator _activator;
-        private readonly IRegistrationContext _registrationContext;
-        private readonly IServiceContextFactory _serviceContextFactory;
+        private readonly IContainerBackend _backend;
+        private readonly IRegistrationSource _registrationSource;
         private readonly ContainerScope _runtimeScope;
 
         internal ContainerRuntime(
-            IRegistrationContext registrationContext,
-            IServiceActivator activator,
-            IServiceContextFactory contextFactory)
+            IRegistrationSource registrationSource,
+            IContainerBackend backend)
         {
-            _registrationContext = registrationContext ?? throw new ArgumentNullException(nameof(registrationContext));
-            _activator = activator ?? throw new ArgumentNullException(nameof(activator));
-            _serviceContextFactory = contextFactory ?? throw new ArgumentNullException(nameof(activator));
+            _registrationSource = registrationSource ?? throw new ArgumentNullException(nameof(registrationSource));
+            _backend = backend ?? throw
+                new ArgumentNullException(nameof(backend));
 
             // We create a runtime scope to handle the storage and retrieval of singleton services.
             _runtimeScope = (ContainerScope) CreateScope();
@@ -25,55 +25,47 @@ namespace InversionOfControl
 
         public IContainerScope CreateScope()
         {
-            // Create new service context for each scope.
-            var serviceContext = _serviceContextFactory.CreateContext();
+            // Create new context for each scope.
+            var scopeContext = _backend.CreateScopeContext();
 
-            // Both the runtime and the container scope use the same activator instance.
-            return new ContainerScope(serviceContext, _activator, this);
+            // Both the runtime and the container scope use the same backend instance.
+            return new ContainerScope(scopeContext, _backend, this);
         }
 
-        public TService GetService<TService>()
+        public object GetService(Type type)
         {
-            var type = typeof(TService);
+            var services = GetServices(new DependencyChain(type), _runtimeScope);
 
-            var service = GetService(new DependencyChain(type), _runtimeScope);
-
-            // If the service doesn't exist, the type was never registered.
-            if (service == null)
-                throw new MissingServiceException(type);
-
-            return (TService) service;
+            return _backend.CreateService(type, services);
         }
 
-        internal object GetService(DependencyChain chain, ContainerScope scope)
+        internal IEnumerable<object> GetServices(DependencyChain chain, ContainerScope scope)
         {
             // First, read the registration from the runtime to determine the lifespan.
-            var registration = _registrationContext.GetRegistration(chain.Type);
+            var registrations = _registrationSource.GetRegistrations(chain.Type);
 
-            // We return null here instead of throwing an exception.
-            // Different exceptions might want to be thrown depending on the context.
-            if (registration == null)
-                return null;
-
-            switch (registration.ServiceLifespan)
+            return registrations.Select(registration =>
             {
-                case ServiceLifespan.Transient:
+                switch (registration.ServiceLifespan)
+                {
+                    case ServiceLifespan.Transient:
 
-                    // For Transient, activate a new instance each time.
-                    return _activator.ActivateInstance(registration, chain, new ServiceVisitor(this, scope));
+                        // For Transient, activate a new instance each time.
+                        return _backend.ActivateInstance(registration, chain, new ServiceVisitor(this, scope));
 
-                case ServiceLifespan.Singleton:
+                    case ServiceLifespan.Singleton:
 
-                    // For Singleton, rely on the runtime scope to retrieve the instance.
-                    return _runtimeScope.GetScopedService(registration, chain);
+                        // For Singleton, rely on the runtime scope to retrieve the instance.
+                        return _runtimeScope.GetScopedService(registration, chain);
 
-                case ServiceLifespan.Scoped:
+                    case ServiceLifespan.Scoped:
 
-                    // For Scoped, rely on the scope to retrieve the instance.
-                    return scope.GetScopedService(registration, chain);
-                default:
-                    throw new NotImplementedException($"Lifespan '{registration.ServiceLifespan}' is not supported");
-            }
+                        // For Scoped, rely on the scope to retrieve the instance.
+                        return scope.GetScopedService(registration, chain);
+                    default:
+                        throw new NotImplementedException($"Lifespan '{registration.ServiceLifespan}' is not supported");
+                }
+            });
         }
     }
 }

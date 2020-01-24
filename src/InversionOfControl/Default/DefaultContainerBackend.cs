@@ -1,15 +1,45 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace InversionOfControl
 {
     /// <summary>
-    /// The default implementation of the IServiceActivator interface
+    /// The default implementation of the IContainerBackend interface
     /// </summary>
-    public class DefaultServiceActivator : IServiceActivator
+    public class DefaultContainerBackend : IContainerBackend
     {
-        public object ActivateInstance(ServiceRegistration registration, DependencyChain chain, IServiceVisitor visitor)
+        public virtual IScopeContext CreateScopeContext() => new DefaultScopeContext();
+
+        public virtual object CreateService(Type type, IEnumerable<object> services)
+        {
+            // Check if the type is a list and attempt 
+            if (type.IsGenericType)
+            {
+                var genericType = type.GetGenericArguments().First();
+
+                // We need to construct the list type from the generic type argument of the service.
+                var listType = typeof(List<>).MakeGenericType(genericType);
+
+                // If a list can be assigned to the service type,
+                // create a list from resolved services and return it.
+                if (type.IsAssignableFrom(listType))
+                {
+                    var list = (IList) Activator.CreateInstance(listType);
+
+                    // We then need to add all resolved services to that list.
+                    foreach (var service in services)
+                        list.Add(service);
+
+                    return list;
+                }
+            }
+
+            return services.FirstOrDefault();
+        }
+
+        public virtual object ActivateInstance(ServiceRegistration registration, DependencyChain chain, IContainerVisitor visitor)
         {
             // Check dependency chain to see if we have a circular dependency.
             if (DetectCycle(chain))
@@ -19,12 +49,6 @@ namespace InversionOfControl
             if (registration.FactoryMethod != null)
                 return visitor.InvokeServiceFactory(registration.FactoryMethod);
 
-            // Otherwise, activate by constructor.
-            return ActivateConstructor(registration, chain, visitor);
-        }
-
-        private object ActivateConstructor(ServiceRegistration registration, DependencyChain chain, IServiceVisitor visitor)
-        {
             var concreteType = registration.ConcreteType;
 
             // If the concrete type is a generic type definition, we cannot invoke it's constructor.
@@ -51,8 +75,11 @@ namespace InversionOfControl
                     // Create a new DependencyChain node for the parameter type.
                     var childChain = new DependencyChain(paramInfo.ParameterType, chain);
 
-                    // Attempt to locate the service.
-                    var parameter = visitor.LocateService(childChain);
+                    // Attempt to locate the services for the parameter.
+                    var services = visitor.LocateServices(childChain);
+
+                    // Create the parameter from the resolved services.
+                    var parameter = CreateService(paramInfo.ParameterType, services);
 
                     // If the service for the parameter was not found, mark it as missing.
                     if (parameter == null)
