@@ -103,7 +103,7 @@ Currently, the framework looks for the constructor with the most amount of param
 ## Exception Handling
 
 An important aspect to this framework is the way it manages exceptions.
-There are currently 4 different exceptions that it currently throws:
+There are 4 different exceptions that it currently throws:
 * MissingServiceException - thrown when the required service that was requested was not registered in the container.
 * MissingDependencyException - thrown when a dependancy for a service was not registered in the container.
 * MissingConstructorException - thrown when no public constructors are available for a requested service.
