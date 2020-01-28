@@ -140,7 +140,7 @@ var containerBuilder = new ContainerBuilder()
     .UseRegistrationSource(new CustomRegistrationSource());
 ```
 
-Note: Setting a new registration source will overrie all previously registered services.
+Note: Setting a new registration source will override all previously registered services.
 
 ### IContainerBackend
 
