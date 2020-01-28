@@ -144,9 +144,9 @@ Note: Setting a new registration source will override all previously registered 
 
 ### IContainerBackend
 
-To abstract away all internal functionality for this framework, a IContainerBackend interface was created to sperate it out from basic service management. This backend system can be overriden to allow the user to provide custom implementation of specific backend logic.
+To abstract away all internal workings for this framework, a IContainerBackend interface was created to sperate out from basic service management. This backend system can be overriden to allow the user to provide custom implementation of specific backend logic.
 
-If only specific methods want to be overriden, then the user can inheric from the DefaultContainerBackend and override any of the desired method.
+If only specific methods want to be overriden, then the user can inheric from the DefaultContainerBackend and override any of the desired methods.
 
 The IContainerBackend has the following interface:
 
