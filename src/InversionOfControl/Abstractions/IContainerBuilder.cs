@@ -5,7 +5,7 @@ namespace InversionOfControl
     /// <summary>
     /// Builds a container runtime with registered services and their lifespans.
     /// </summary>
-    public interface IContainerBuilder : IRegistrationSource
+    public interface IContainerBuilder
     {
         /// <summary>
         /// Allows the resulting container to use a custom backend implementation.
