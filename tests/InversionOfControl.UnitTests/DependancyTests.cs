@@ -49,19 +49,6 @@ namespace InversionOfControl.UnitTests
             multipleConstructors.TestString.Should().Be("Test");
         }
 
-        [Fact]
-        public void ServicesShouldActivateWithSecondLargestConstructorIfDependanciesNotFound()
-        {
-            var runtime = new ContainerBuilder()
-                .AddTransient<MultipleConstructors>()
-                .BuildRuntime();
-
-            var multipleConstructors = runtime.GetService<MultipleConstructors>();
-
-            multipleConstructors.Should().NotBeNull();
-            multipleConstructors.TestString.Should().Be("DefaultConstructor");
-        }
-
         public class MultipleConstructors
         {
             public string TestString { get; set; }

@@ -44,6 +44,8 @@ namespace InversionOfControl.UnitTests
                 .WithMessage(
                     $"Unable to resolve dependency '{typeof(G).FullName}' for type '{typeof(C).FullName}'.{Environment.NewLine}" +
                     $"Resolution Stack:{Environment.NewLine}" +
+                    // G is the missing type
+                    $"Type: {typeof(G).FullName}{Environment.NewLine}" +
                     // C depends on G
                     $"Type: {typeof(C).FullName}{Environment.NewLine}" +
                     // A depends on C

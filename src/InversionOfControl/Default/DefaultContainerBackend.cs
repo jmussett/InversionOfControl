@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace InversionOfControl
 {
@@ -10,6 +11,9 @@ namespace InversionOfControl
     /// </summary>
     public class DefaultContainerBackend : IContainerBackend
     {
+        private readonly IDictionary<Type, ConstructorExpression> _constructorCache
+            = new Dictionary<Type, ConstructorExpression>();
+
         public virtual IScopeContext CreateScopeContext() => new DefaultScopeContext();
 
         public virtual object CreateService(Type type, IEnumerable<object> services)
@@ -49,62 +53,82 @@ namespace InversionOfControl
             if (registration.FactoryMethod != null)
                 return visitor.InvokeServiceFactory(registration.FactoryMethod);
 
-            var concreteType = registration.ConcreteType;
+            // Check the cache to see if the constructor expression was previously built.
+            if (!_constructorCache.TryGetValue(registration.ServiceType, out var expression))
+            {
+                // Constructor expression hasn't been cached, we need to build it.
+                expression = BuildConstructorExpression(registration.ConcreteType, chain);
 
+                _constructorCache.Add(registration.ServiceType, expression);
+            }
+
+            var parameters = new object[expression.ParameterChains.Length];
+
+            for(var i = 0; i < expression.ParameterChains.Length; i++)
+            {
+                var paramChain = expression.ParameterChains[i];
+
+                // Attempt to locate the services for the parameter.
+                var services = visitor.LocateServices(paramChain);
+
+                // Create the parameter from the resolved services.
+                var parameter = CreateService(paramChain.Type, services);
+
+                parameters[i] = parameter
+                    ?? throw new MissingDependencyException(paramChain.Type, chain.Type, GetResolutionStack(paramChain));
+            }
+
+            return expression.Activate(parameters);
+        }
+
+        private ConstructorExpression BuildConstructorExpression(Type concreteType, DependencyChain chain)
+        {
             // If the concrete type is a generic type definition, we cannot invoke it's constructor.
             // We need to construct the type using the generic arguments defined on the requested type from the dependency chain.
             if (concreteType.IsGenericTypeDefinition)
                 concreteType = concreteType.MakeGenericType(chain.Type.GetGenericArguments());
 
             // Order by constructors with the most amount of parameters.
-            var constructors = concreteType.GetConstructors()
-                .OrderByDescending(x => x.GetParameters().Length);
+            var constructors = concreteType.GetConstructors();
 
-            Type missingService = null;
+            var expression = new ConstructorExpression();
 
-            foreach (var constructor in constructors)
+            // Don't bother ordering if only 1 constructor is present.
+            if (constructors.Length == 1)
+                return BuildConstructor(constructors[0], chain);
+
+            var constructor = constructors
+                .OrderByDescending(x => x.GetParameters().Length)
+                .FirstOrDefault();
+
+            // No valid public constructors were found.
+            if (constructor == null)
+                throw new MissingConstructorException(concreteType);
+
+            return BuildConstructor(constructor, chain);
+        }
+
+        private ConstructorExpression BuildConstructor(ConstructorInfo constructor, DependencyChain chain)
+        {
+            var parameters = constructor.GetParameters();
+
+            var expression = new ConstructorExpression
             {
-                // If we're interating through a new constructor, set the missing service to null.
-                missingService = null;
+                ParameterChains = new DependencyChain[parameters.Length]
+            };
 
-                var paramInstances = new List<object>();
+            // Iterate through all the parameters in the constructor.
+            for (var i = 0; i < parameters.Length; i++)
+            {
+                // Create a new DependencyChain node for the parameter type.
+                var childChain = new DependencyChain(parameters[i].ParameterType, chain);
 
-                // Iterate through all the parameters in the constructor.
-                foreach (var paramInfo in constructor.GetParameters())
-                {
-                    // Create a new DependencyChain node for the parameter type.
-                    var childChain = new DependencyChain(paramInfo.ParameterType, chain);
-
-                    // Attempt to locate the services for the parameter.
-                    var services = visitor.LocateServices(childChain);
-
-                    // Create the parameter from the resolved services.
-                    var parameter = CreateService(paramInfo.ParameterType, services);
-
-                    // If the service for the parameter was not found, mark it as missing.
-                    if (parameter == null)
-                    {
-                        missingService = paramInfo.ParameterType;
-                        break;
-                    }
-
-                    paramInstances.Add(parameter);
-                }
-
-                // If a parameter was missing, move to the next constructor.
-                if (missingService != null)
-                    continue;
-
-                // We have a valid constructor with instanciated parameters, time to invoke it.
-                return constructor.Invoke(paramInstances.ToArray());
+                expression.ParameterChains[i] = childChain;
             }
 
-            // Throw exception if a service was missing for the last constructor.
-            if (missingService != null)
-                throw new MissingDependencyException(missingService, registration.ConcreteType, GetResolutionStack(chain));
+            expression.BuildExpression(constructor);
 
-            // If we reach this code path, no valid public constructors were found.
-            throw new MissingConstructorException(registration.ConcreteType);
+            return expression;
         }
 
         // We produce the resolution stack by recursively interating through the dependency chain nodes.
@@ -126,12 +150,12 @@ namespace InversionOfControl
         // We attempt to detect a circular dependency by recursively interating through the types in the chain.
         private bool DetectCycle(DependencyChain chain)
         {
-            var types = new List<Type>();
+            var types = new HashSet<Type>();
 
             return CheckDependency(chain, types);
         }
 
-        private bool CheckDependency(DependencyChain chain, List<Type> types)
+        private bool CheckDependency(DependencyChain chain, HashSet<Type> types)
         {
             // If the list of types contains the current type in the dependency, we have a circular reference.
             if (types.Contains(chain.Type))
